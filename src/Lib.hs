@@ -7,7 +7,9 @@ import System.IO
 
 
 dispatch :: [(String, [String] -> IO ())]
-dispatch =  [ ("write", write)
+dispatch =  [("write", write)
+            ,("sharpen", sharpen)
+            ,("clear", clear)
             ]
 
 someFunc :: IO ()
@@ -18,4 +20,27 @@ someFunc = do
 
 
 write :: [String] -> IO ()
-write _ = putStrLn "sa dude"
+write [text] = do
+  pencilDat <- readFile "pencil.dat"
+  let sharpness = read pencilDat - 1
+  if sharpness > 0 then
+    do
+      appendFile "paper.txt" text
+      thePaper <- readFile "paper.txt"
+      putStrLn ("the paper:\n\n" ++ thePaper)
+    else
+      putStrLn "not enough sharp"
+
+
+
+sharpen :: [String] -> IO ()
+sharpen _ = do
+  writeFile "pencil.dat" "100"
+  putStrLn "pencil sharpened"
+
+
+
+clear :: [String] -> IO ()
+clear _ = do
+  writeFile "paper.txt" ""
+  putStrLn "all cleared"
