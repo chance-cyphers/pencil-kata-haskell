@@ -20,17 +20,26 @@ someFunc = do
 
 
 write :: [String] -> IO ()
-write [text] = do
-  pencilDat <- readFile "pencil.dat"
-  let sharpness = read pencilDat - 1
-  if sharpness > 0 then
-    do
-      appendFile "paper.txt" text
-      thePaper <- readFile "paper.txt"
-      putStrLn ("the paper:\n\n" ++ thePaper)
-    else
-      putStrLn "not enough sharp"
+write [desiredText] = do
+    pencilDat <- readFile "pencil.dat"
+    let pencil = Pencil $ read pencilDat
+        (newPencil, textToWrite) = calcText pencil desiredText
+    appendFile "paper.txt" textToWrite
+    writeFile "pencil.dat" (show (sharpness newPencil))
+    thePaper <- readFile "paper.txt"
+    putStrLn ("the paper:\n\n" ++ thePaper)
 
+
+data Pencil = Pencil { sharpness :: Int } deriving (Show)
+
+
+calcText :: Pencil -> String -> (Pencil, String)
+calcText pencil text =
+  let
+    writeLength = min (sharpness pencil) (length text)
+    textToWrite = take writeLength text
+    updatedPencil = Pencil $ (sharpness pencil) - writeLength
+  in (updatedPencil, textToWrite)
 
 
 sharpen :: [String] -> IO ()
